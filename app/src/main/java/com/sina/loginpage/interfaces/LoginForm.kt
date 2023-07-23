@@ -48,6 +48,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sina.loginpage.MainActivity
+import com.sina.loginpage.extentions.isValidPassword
+import com.sina.loginpage.extentions.isValidUsername
 import com.sina.loginpage.ui.theme.LoginPageTheme
 
 @Composable
@@ -103,14 +105,21 @@ fun LoginForm() {
 }
 
 fun checkCredentials(credentials: Credentials, context: Context) {
-    if (credentials.isNotEmpty() && credentials.userName == "sina") {
-        context.startActivity(Intent(context, MainActivity::class.java))
-        (context as Activity).finish()
+    if (isValidUsername(credentials.userName)) {
+        if (credentials.userName == "sina") {
+            if (isValidPassword(credentials.password)) {
+                context.startActivity(Intent(context, MainActivity::class.java))
+                (context as Activity).finish()
+            } else {
+                Toast.makeText(context, "رمز عبور باید حداقل یک حرف بزرگ و یک عدد داشته باشد", Toast.LENGTH_LONG).show()
+            }
+        } else {
+            Toast.makeText(context, "نام کاربری باید برابر با 'sina' باشد", Toast.LENGTH_LONG).show()
+        }
     } else {
-        Toast.makeText(context, "فقط با نام کاربری sina وارد شوید", Toast.LENGTH_LONG).show()
+        Toast.makeText(context, "نام کاربری باید شامل حروف انگلیسی، اعداد و کاراکتر '_' باشد", Toast.LENGTH_LONG).show()
     }
 }
-
 data class Credentials(
     val userName: String = "",
     val password: String = "",
@@ -185,7 +194,7 @@ fun PasswordField(
     placeHolder: String = "Enter your Password"
 ) {
     val focusManager = LocalFocusManager.current
-    var isPasswordVisible by remember { mutableStateOf(true) }
+    var isPasswordVisible by remember { mutableStateOf(false) }
 
     val leadingIcon = @Composable {
         Icon(
